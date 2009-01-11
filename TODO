@@ -1,0 +1,15 @@
+TODO:
+
+- Fix Mjs.description and Mjs.version
+- Fix LICENSE with your name
+- Fix Rakefile with your name and contact info
+- Add your code to lib/mjs.rb
+- Add your Merb rake tasks to lib/mjs/merbtasks.rb
+
+Remove anything that you don't need:
+
+- app/controllers/main.rb Mjs::Main controller
+- app/views/layout/mjs.html.erb
+- spec/controllers/main_spec.rb controller specs
+- public/* any public files
+- stubs/* any stub files

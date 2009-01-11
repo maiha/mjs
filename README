@@ -1,0 +1,89 @@
+Mjs
+===
+
+A slice for the Merb framework that offers Ajax actions like RJS with jQuery
+This privides new 'link_to' method for clients and 'page' object for servers.
+
+
+Methods
+=======
+
+* Merb::Controller#link_to(name, url='', opts={})
+    link_to now recognize :remote, :submit option
+
+* Merb::Controller#page
+    page method is reserved for RJS object.
+    You can access dom elements by it as many times and in anywhere.
+    No more ugly render(:update) block, just type 'page' as you want! 
+
+
+Setup
+=====
+
+Include jQuery as usual
+
+app/views/layouts/application.html.erb:
+  <%= js_include_tag  "jquery.js" -%>
+
+
+Example1
+========
+[ajax get request]
+
+1. Add :remote option to create ajax link
+
+    app/views/top/index.html.erb:
+       <div id="message"></div>
+       <%= link_to "hello", url(:action=>"hello"), :remote=>true %>
+                                                   ^^^^^^^^^^^^^
+    generates:
+       <a onclick="; $.getScript('/top/hello'); return false;" href="#">hello</a>
+    
+2. Use 'page' object to respond as RJS.
+
+    app/controllers/top.rb:
+       def hello
+         page[:message].text "Good morning!"
+         return page
+       end      
+
+    generates:
+       $("#message").text("Good morning!");
+
+
+Example2
+========
+[ajax post request]
+
+1. Add :submit option to specify a DOM element that should be serialized
+
+    app/views/top/index.html.erb:
+       <div id="edit">
+         <%= text_field ... %>
+         <%= text_area  ... %>
+         <%= link_to "update", url(:action=>"update"), :submit=>:edit %>
+                                                        ^^^^^^^^^^^^^
+    generates:
+        <a onclick="; $.post('/top/update', $('#edit input').serialize(), null, 'script');; return false;" href="#">update</a>
+    
+2. enjoy 'page' as you like
+
+    app/controllers/top.rb:
+       def update(id)
+         @item = Item.find(id)
+         ... # update logic is here
+         page[:message].text "successfully saved"
+         update_canvas_for(@item)
+         return page
+       end      
+
+       private
+         def update_canvas_for(item)
+           page[:workspace].html partial("record", :item=>item)
+         rescue => error
+           page[:message].text error.to_s
+           page << "alert('something wrong!')"
+         end
+
+
+Copyright (c) 2008 maiha@wota.jp, released under the MIT license
