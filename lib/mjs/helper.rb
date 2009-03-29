@@ -72,7 +72,7 @@ module Mjs
       }
 
       def options_for_ajax(options)
-        js_options = build_callbacks(options)
+        js_options = build_callbacks!(options)
 
         submit = options.delete(:submit)
         target =
@@ -111,7 +111,8 @@ module Mjs
         end
       end
 
-      def build_callbacks(options)
+      # this method affects "options"
+      def build_callbacks!(options)
         callbacks = {}
 
         # special callback
@@ -124,6 +125,7 @@ module Mjs
         options.each do |callback, code|
           if (name = AJAX_FUNCTIONS[callback])
             callbacks[name.to_s] = "function(request){#{code}}"
+            options.delete(callback)
           end
         end
 
