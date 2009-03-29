@@ -15,6 +15,19 @@ module Mjs
       end
     end
 
+    # experimental: not tested yet
+    def button_to(name, url='', opts={})
+      ajax = remote_function(opts)
+      opts[:type] = 'button'
+      opts[:value] = name
+      opts[:remote] ||= true if opts[:submit]
+      if opts.delete(:remote)
+        ajax = remote_function(opts)
+        opts[:onclick] = "#{opts.delete(:onclick)}; #{ajax}; return false;"
+      end
+      %{<input #{ opts.to_xml_attributes }>}
+    end
+
     # override! :link_to # for Ajax
     def link_to(name, url='', opts={})
       opts[:href]   ||= url
