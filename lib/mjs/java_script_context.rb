@@ -362,6 +362,14 @@ module Mjs
 
             def javascript_object_for(object)
               object.respond_to?(:to_json) ? object.to_json : object.inspect
+
+            # TODO: to_json is too buggy!
+            rescue JSON::GeneratorError
+              if object.is_a?(String)
+                object.inspect
+              else
+                raise
+              end
             end
 
             def arguments_for_call(arguments, block = nil)
