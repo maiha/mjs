@@ -8,11 +8,14 @@ module Mjs
 
     def remote_function(opts)
       build_href(opts)
-      if opts[:submit]
-        "$.ajax(%s);" % options_for_ajax(opts)
-      else
-        "$.getScript('#{opts[:href]}')"
+      unless opts[:submit]
+        opts[:url] ||= opts[:href]
+        opts[:dataType] = "script"
       end
+      function = "jQuery.ajax(%s);" % options_for_ajax(opts)
+      confirm  = opts.delete(:confirm)
+      function = "if (confirm('#{escape_javascript(confirm)}')) { #{function}; }" if confirm
+      return function
     end
 
     # experimental: not tested yet
@@ -84,25 +87,31 @@ module Mjs
         :xhr         => :xhr,
       }
 
+
       def options_for_ajax(options)
         js_options = build_callbacks!(options)
 
         submit = options.delete(:submit)
         target =
           case submit
-          when Symbol then "$('##{submit} input')"
-          when String then "$('#{submit}')"
+          when Symbol then "jQuery('##{submit} input, ##{submit} textarea')"
+          when String then "jQuery('#{submit}')"
           when NilClass    # GET requst
           else
             raise ArgumentError, "link_to :submit expects Symbol or String, but got #{submit.class.name}"
           end
-
         build_href(options)
 
-        js_options[:type] = "'POST'"
-        js_options[:url]  = "'#{options[:href]}'"
-        js_options[:data] = "#{target}.serialize()"
+        if target
+          js_options[:type] = "'POST'"
+          js_options[:data] = "#{target}.serialize()"
+        end
+        js_options[:url]  = "'#{options[:url] || options[:href]}'"
         js_options[:dataType] = "'script'"
+
+        if js_options[:url].blank?
+          raise "Cannot build ajax options because url is blank. (#{options.inspect})"
+        end
 
         options_for_javascript(js_options)
       end
@@ -117,8 +126,8 @@ module Mjs
 
       def jquery_selector(key)
         case key
-        when Symbol then "$('##{key}')"
-        when String then "$('#{key}')"
+        when Symbol then "jQuery('##{key}')"
+        when String then "jQuery('#{key}')"
         else
           raise "invalid jquery selector: [#{key.class}] #{key}"
         end
@@ -128,11 +137,19 @@ module Mjs
       def build_callbacks!(options)
         callbacks = {}
 
-        # special callback
-        spinner = options.delete(:spinner)
-        if spinner
-          options[:before]   = [options[:before],   "%s.show()" % jquery_selector(spinner)].compact * ';'
-          options[:complete] = [options[:complete], "%s.hide()" % jquery_selector(spinner)].compact * ';'
+        [:before, :complete].each do |event|
+          options[event] = Array(options[event])
+        end
+
+        # special callback (:spinner)
+        if options[:spinner]
+          target = jquery_selector(options.delete(:spinner))
+          options[:before]   << "#{target}.show()"
+          options[:complete] << "#{target}.hide()"
+        end
+
+        [:before, :complete].each do |event|
+          options[event] = options[event].compact * ';'
         end
 
         options.each do |callback, code|
@@ -144,6 +161,5 @@ module Mjs
 
         callbacks
       end
-
   end
 end
