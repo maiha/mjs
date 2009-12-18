@@ -94,7 +94,7 @@ module Mjs
         submit = options.delete(:submit)
         target =
           case submit
-          when Symbol then "jQuery('##{submit} input, ##{submit} textarea')"
+          when Symbol then "jQuery('##{submit} input, ##{submit} select, ##{submit} textarea')"
           when String then "jQuery('#{submit}')"
           when NilClass    # GET requst
           else
