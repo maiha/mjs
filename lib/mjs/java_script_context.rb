@@ -42,7 +42,7 @@ module Mjs
               JavaScriptElementProxy.new(self, id)
             else
               raise NotImplementedError, "[MJS] RecordIdentifier.dom_id(id)"
-              JavaScriptElementProxy.new(self, ActionController::RecordIdentifier.dom_id(id))
+#              JavaScriptElementProxy.new(self, ActionController::RecordIdentifier.dom_id(id))
             end
           end
 

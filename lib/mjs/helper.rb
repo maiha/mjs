@@ -1,4 +1,5 @@
-require 'mjs/java_script_context'
+require 'extlib'
+require File.dirname(__FILE__) + '/java_script_context'
 
 module Mjs
   module Helper
@@ -35,11 +36,15 @@ module Mjs
     def link_to(name, url='', opts={})
       opts[:href]   ||= url
       opts[:remote] ||= true if opts[:submit]
-      return super unless opts.delete(:remote)
 
-      ajax = remote_function(opts)
-      opts[:onclick] = "#{opts.delete(:onclick)}; #{ajax}; return false;"
-      opts[:href] = '#'
+      if opts.delete(:remote)
+        ajax = remote_function(opts)
+        opts[:onclick] = "#{opts.delete(:onclick)}; #{ajax}; return false;"
+        opts[:href] = '#'
+      else
+        opts[:href] ||= url
+      end
+
       %{<a #{ opts.to_xml_attributes }>#{name}</a>}
     end
 
@@ -64,7 +69,7 @@ module Mjs
 
     private
       def build_href(opts)
-        if opts[:href].is_a?(DataMapper::Resource)
+        if defined?(DataMapper) and opts[:href].is_a?(DataMapper::Resource)
           record = opts[:href]
           if record.new_record?
             opts[:href] = resource(record.class.name.downcase.pluralize.intern, :new)

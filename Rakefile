@@ -8,8 +8,8 @@ GEM_NAME = "mjs"
 AUTHOR = "maiha"
 EMAIL = "maiha@wota.jp"
 HOMEPAGE = "http://github.com/maiha/mjs"
-SUMMARY = "A slice for the Merb framework that offers Ajax actions like RJS with jQuery"
-GEM_VERSION = "0.0.6"
+SUMMARY = "A ruby library that offers Ajax actions like RJS with jQuery"
+GEM_VERSION = "0.1.0"
 
 spec = Gem::Specification.new do |s|
   s.rubyforge_project = 'merb'
@@ -23,7 +23,8 @@ spec = Gem::Specification.new do |s|
   s.author = AUTHOR
   s.email = EMAIL
   s.homepage = HOMEPAGE
-  s.add_dependency('merb-slices', '>= 1.0.7.1')
+#  s.add_dependency('merb-slices', '>= 1.0.7.1')
+   s.add_dependency('extlib', '>= 0.9.14')
   s.require_path = 'lib'
   s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{lib,spec,app,public,stubs}/**/*")
 end
