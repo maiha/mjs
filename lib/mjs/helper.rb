@@ -11,7 +11,6 @@ module Mjs
       build_href(opts)
       unless opts[:submit]
         opts[:url] ||= opts[:href]
-        opts[:dataType] = "script"
       end
       function = "jQuery.ajax(%s);" % options_for_ajax(opts)
       confirm  = opts.delete(:confirm)
@@ -21,11 +20,10 @@ module Mjs
 
     # experimental: not tested yet
     def button_to(name, url='', opts={})
-      ajax = remote_function(opts)
       opts[:type] = 'button'
       opts[:value] = name
-      opts[:remote] ||= true if opts[:submit]
-      if opts.delete(:remote)
+
+      if opts.delete(:remote) || opts[:submit] || opts[:update]
         ajax = remote_function(opts)
         opts[:onclick] = "#{opts.delete(:onclick)}; #{ajax}; return false;"
       end
@@ -34,10 +32,9 @@ module Mjs
 
     # override! :link_to # for Ajax
     def link_to(name, url='', opts={})
-      opts[:href]   ||= url
-      opts[:remote] ||= true if opts[:submit]
+      opts[:href] ||= url
 
-      if opts.delete(:remote)
+      if opts.delete(:remote) || opts[:submit] || opts[:update]
         ajax = remote_function(opts)
         opts[:onclick] = "#{opts.delete(:onclick)}; #{ajax}; return false;"
         opts[:href] = '#'
@@ -105,14 +102,20 @@ module Mjs
           else
             raise ArgumentError, "link_to :submit expects Symbol or String, but got #{submit.class.name}"
           end
+
         build_href(options)
 
         if target
           js_options[:type] = "'POST'"
           js_options[:data] = "#{target}.serialize()"
         end
+
+        if options[:type]
+          js_options[:type] = "'%s'" % options.delete(:type).to_s.upcase
+        end
+
         js_options[:url]  = "'#{options[:url] || options[:href]}'"
-        js_options[:dataType] = "'script'"
+        js_options[:dataType] ||= "'script'"
 
         if js_options[:url].blank?
           raise "Cannot build ajax options because url is blank. (#{options.inspect})"
@@ -141,8 +144,9 @@ module Mjs
       # this method affects "options"
       def build_callbacks!(options)
         callbacks = {}
+        events = [:before, :success, :complete]
 
-        [:before, :complete].each do |event|
+        events.each do |event|
           options[event] = Array(options[event])
         end
 
@@ -153,13 +157,21 @@ module Mjs
           options[:complete] << "#{target}.hide()"
         end
 
-        [:before, :complete].each do |event|
+        # dom updator
+        update = options.delete(:update)
+        if update
+          callbacks[:dataType] = "'html'"
+          callbacks[:type] ||= "'POST'"
+          options[:success] << "%s.html(request)" % jquery_selector(update)
+        end
+
+        events.each do |event|
           options[event] = options[event].compact * ';'
         end
 
         options.each do |callback, code|
           if (name = AJAX_FUNCTIONS[callback])
-            callbacks[name.to_s] = "function(request){#{code}}"
+            callbacks[name.to_s] = "function(request){#{code}}" unless code.to_s.empty?
             options.delete(callback)
           end
         end
