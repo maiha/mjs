@@ -1,12 +1,13 @@
 if defined?(Merb::Plugins)
 
-  $:.unshift File.dirname(__FILE__)
+  lib = File.dirname(File.dirname(__FILE__))
+  $:.unshift lib
 
   dependency 'merb-slices', :immediate => true
   Merb::Plugins.add_rakefiles "mjs/merbtasks", "mjs/slicetasks", "mjs/spectasks"
 
   # Register the Slice for the current host application
-  Merb::Slices::register(__FILE__)
+  Merb::Slices::register(lib + "/mjs.rb")
   
   # Slice configuration - set this in a before_app_loads callback.
   # By default a Slice uses its own layout, so you can swicht to 
