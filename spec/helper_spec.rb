@@ -120,4 +120,8 @@ describe Mjs::Helper do
     "jQuery.ajax({dataType:'html', success:function(request){jQuery('dst').html(request)}, type:'GET', url:'/'});"
   end
 
+  remote_function(:url=>'/', :submit=>"form", :update=>:dst) do
+    "jQuery.ajax({data:jQuery('form').serialize(), dataType:'html', success:function(request){jQuery('#dst').html(request)}, type:'POST', url:'/'});"
+  end
+
 end
