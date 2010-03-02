@@ -1,89 +1,44 @@
 Mjs
 ===
 
-A slice for the Merb framework that offers Ajax actions like RJS with jQuery
-This privides new 'link_to' method for clients and 'page' object for servers.
+A Ruby library that offers quite easy-to-use Ajax actions like RJS with jQuery.
 
 
-Methods
-=======
+Helper
+======
 
-* Merb::Controller#link_to(name, url='', opts={})
-    link_to now recognize :remote, :submit option
+  * link_to(name, url='', opts={})
+  * button_to(name, url='', opts={})
 
-* Merb::Controller#page
-    page method is reserved for RJS object.
-    You can access dom elements by it as many times and in anywhere.
-    No more ugly render(:update) block, just type 'page' as you want! 
+  [opts]
+    :remote  # Generate Ajaxed link if true, otherwise normal link.
+    :submit  # Specifies the DOM ID that's used as the parent of
+               the form elements. (should be symbol)
+    :update  # Specifies the DOM ID that's replaced by the response.
 
 
-Setup
+Usage
 =====
 
-Include jQuery as usual
+  link_to "GO", "/search"
+    => '<a href="/search">GO</a>'
 
-app/views/layouts/application.html.erb:
-  <%= js_include_tag  "jquery.js" -%>
+  link_to "GO", "/search", :remote=>true
+    => '<a url="/search" onclick="; jQuery.ajax({dataType:'script', url:'/search'});; return false;" href="#">GO</a>'
 
-
-Example1
-========
-[ajax get request]
-
-1. Add :remote option to create ajax link
-
-    app/views/top/index.html.erb:
-       <div id="message"></div>
-       <%= link_to "hello", url(:action=>"hello"), :remote=>true %>
-                                                   ^^^^^^^^^^^^^
-    generates:
-       <a onclick="; $.getScript('/top/hello'); return false;" href="#">hello</a>
-    
-2. Use 'page' object to respond as RJS.
-
-    app/controllers/top.rb:
-       def hello
-         page[:message].text "Good morning!"
-         return page
-       end      
-
-    generates:
-       $("#message").text("Good morning!");
+  link_to "GO", "/search", :submit=>:foo
+    => '<a onclick="; jQuery.ajax({data:jQuery('#foo input, #foo select, #foo textarea').serialize(), dataType:'script', type:'POST', url:'/search'});; return false;" href="#">GO</a>'
 
 
-Example2
-========
-[ajax post request]
+  link_to "GO", "/search", :update=>:bar
+    => '<a url="/search" onclick="; jQuery.ajax({dataType:'html', success:function(request){jQuery('#bar').html(request)}, type:'POST', url:'/search'});; return false;" href="#">GO</a>'
 
-1. Add :submit option to specify a DOM element that should be serialized
 
-    app/views/top/index.html.erb:
-       <div id="edit">
-         <%= text_field ... %>
-         <%= text_area  ... %>
-         <%= link_to "update", url(:action=>"update"), :submit=>:edit %>
-                                                        ^^^^^^^^^^^^^
-    generates:
-        <a onclick="; $.post('/top/update', $('#edit input').serialize(), null, 'script');; return false;" href="#">update</a>
-    
-2. enjoy 'page' as you like
+Framework
+=========
 
-    app/controllers/top.rb:
-       def update(id)
-         @item = Item.find(id)
-         ... # update logic is here
-         page[:message].text "successfully saved"
-         update_canvas_for(@item)
-         return page
-       end      
-
-       private
-         def update_canvas_for(item)
-           page[:workspace].html partial("record", :item=>item)
-         rescue => error
-           page[:message].text error.to_s
-           page << "alert('something wrong!')"
-         end
+  * see 'README.Merb' for Merb users
+  * see 'README.Monk' for Sinatra and Monk users
 
 
 Copyright (c) 2008 maiha@wota.jp, released under the MIT license

@@ -1,0 +1,80 @@
+Mjs
+===
+
+A Ruby library that offers quite easy-to-use Ajax actions like RJS with jQuery.
+
+
+Setup
+=====
+
+  [dependencies]
+    mjs >= 0.1.1
+
+  [init.rb]
+    require 'mjs'
+    class Monk::Glue
+      helpers Mjs::Helper
+    end
+
+
+Example
+=======
+
+  We show two patterns of implementing local gem searcher app.
+
+1. By DOM Updation
+
+  [app/views/home.haml]
+
+    %script{:type=>"text/javascript", :src=>"/js/jquery-1.4.2.min.js"}
+    #form
+      %input{:type=>"text", :name=>"gem", :size=>20}
+      != link_to "Search", "/search", :submit=>:form, :update=>:list
+    %pre#list
+
+
+  [app/routes/site.rb]
+
+    class Main
+      get "/" do
+        haml :home
+      end
+    
+      post "/search" do
+        name = params[:gem].to_s.scan(/[a-z0-9_-]+/).to_s
+        `gem search #{name}`
+      end
+    end
+    
+
+2. By JavaScript Response
+
+  setup:
+
+
+  [app/views/home.haml]
+
+    %script{:type=>"text/javascript", :src=>"/js/jquery-1.4.2.min.js"}
+    #form
+      %input{:type=>"text", :name=>"gem", :size=>20}
+      != link_to "Search", "/search", :submit=>:form
+    %pre#list
+
+
+  [app/routes/site.rb]
+
+    require 'json'      # 'page' needs Object#to_json
+    class Main
+      get "/" do
+        haml :home
+      end
+    
+      post "/search" do
+        name = params[:gem].to_s.scan(/[a-z0-9_-]+/).to_s
+	page[:list].html `gem search #{name}`
+        return page.to_s
+      end
+    end
+
+
+Copyright (c) 2008 maiha@wota.jp, released under the MIT license

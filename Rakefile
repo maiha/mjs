@@ -8,7 +8,7 @@ GEM_NAME = "mjs"
 AUTHOR = "maiha"
 EMAIL = "maiha@wota.jp"
 HOMEPAGE = "http://github.com/maiha/mjs"
-SUMMARY = "A ruby library that offers Ajax actions like RJS with jQuery"
+SUMMARY = "A Ruby library that offers Ajax actions like RJS with jQuery"
 GEM_VERSION = "0.1.1"
 
 spec = Gem::Specification.new do |s|
