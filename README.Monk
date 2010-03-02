@@ -49,9 +49,6 @@ Example
 
 2. By JavaScript Response
 
-  setup:
-
-
   [app/views/home.haml]
 
     %script{:type=>"text/javascript", :src=>"/js/jquery-1.4.2.min.js"}
