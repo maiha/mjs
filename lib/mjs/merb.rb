@@ -3,7 +3,12 @@ if defined?(Merb::Plugins)
   lib = File.dirname(File.dirname(__FILE__))
   $:.unshift lib
 
-  dependency 'merb-slices', :immediate => true
+  if Merb::VERSION >= "1.1.0"
+    # dependency is now handled in Bundler gem
+  else
+    dependency 'merb-slices', :immediate => true
+  end
+
   Merb::Plugins.add_rakefiles "mjs/merbtasks", "mjs/slicetasks", "mjs/spectasks"
 
   # Register the Slice for the current host application
